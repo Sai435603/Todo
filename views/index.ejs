@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+    #task-input {
+        height: 50px;
+        width: 550px;
+        margin-left: 12px;
+        border-radius: 10px;
+        font-size: 25px;
+        padding: 10px;
+        border: 1px solid black;
+        outline: none;
+        box-sizing: border-box;
+    }
+    
+    #task-input-btn {
+        height: 56px;
+        width: 160px;
+        border-radius: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        border: 1px solid black;
+        outline: none;
+        background-color: #f0f0f0;
+        transition: background-color 0.2s;
+    }
+    
+    #task-input-btn:hover {
+        background-color: #e0e0e0;
+    }
+    
+    .task-list {
+        margin-left: 10px;
+    }
+    
+    .task {
+        width: 700px;
+        border: 2px solid black;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+    }
+    
+    .edit-btn, .delete-btn {
+        margin-left: 5px;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 5px;
+        border: 1px solid black;
+        outline: none;
+        transition: background-color 0.2s;
+    }
+    
+    .edit-btn:hover {
+        background-color: lightblue;
+    }
+    
+    .delete-btn:hover {
+        background-color: lightcoral;
+    }
+    </style>
+    <script>
+        function editTodo(id,task){
+            let userInput = prompt("Edit your task:", task); 
+            if(userInput !== null && userInput.trim() !== "") { 
+            fetch(`/edit/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ task: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    const div = document.getElementById(id);
+                    div.querySelector("span").innerHTML=userInput;
+                } 
+                else {
+                    alert("Failed to update task");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+      }
+    }
+        function deleteTodo(id) {
+        fetch(`/delete/${id}`, { method: "DELETE" }) 
+            .then(response => {
+                if(response.ok) {
+                    document.getElementById(id).remove(); 
+                }
+                else{
+                    console.error("Failed to delete task");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h1>To-Do List</h1>
+    <form action="/add" method="POST">
+        <input id="task-input" type="text" name="todo" placeholder="New task" required>
+        <input id="task-input-btn" type="submit" value="Add">
+    </form>
+    <br><br>
+    <div class="task-list">
+        <% for(const todo of todos) { %>
+            <div class="task" id="<%= todo.id %>">
+                <span ><%= todo.task %></span>
+                <div>
+                    <input class="edit-btn" type="button" value="Edit" onclick="editTodo('<%=todo.id%>','<%=todo.task%>')">
+                    <input class="delete-btn" type="button" value="Delete" onclick="deleteTodo('<%=todo.id%>')">
+                </div>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
