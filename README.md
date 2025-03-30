@@ -2,8 +2,8 @@
 
 1. **Clone the repository**
    ```sh
-   git clone https://github.com/your-username/todo-app.git
-   cd todo-app
+   git clone https://github.com/your-username/Todo.git
+   cd Todo
 2. **Install dependencies**
    ```sh
    npm install
