@@ -68,15 +68,23 @@ app.post("/edit/:id", (req, res) => {
         return res.json({ success: false });
     }
 });
-app.post('/add', (req, res) => {
-    const Task = { id: uuidv4(), task: req.body.todo };
-
-    if (Task.task) {
-        let todos = readTodos();
-        todos.push(Task);
-        writeTodos(todos);
+app.post("/add", (req, res) => {
+    const { todo } = req.body;
+    if (!todo) {
+        return res.status(400).json({ success: false, message: "Task cannot be empty" });
     }
 
-    res.redirect('/');
+    let todos = readTodos();
+    const newTodo = {
+        id: uuidv4(),
+        task: todo
+    };
+
+    todos.push(newTodo);
+    writeTodos(todos);
+
+    // Send a JSON response back to the client
+    res.status(201).json({ success: true, todo: newTodo });
 });
+
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
