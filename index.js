@@ -32,16 +32,6 @@ app.get('/', (req, res) => {
     let todos = readTodos();
     res.render('index.ejs', { todos });
 });
-app.get('/edit/:id', (req, res) => {
-    const id = req.params.id;
-    let todos = readTodos();
-    const taskToEdit = todos.find(todo => todo.id === id);
-
-    if(!taskToEdit){
-        return res.status(404).redirect("/");
-    }
-    res.render('edit.ejs', { task: taskToEdit });
-});
 
 app.delete('/delete/:id', (req, res) => {
     const id = req.params.id;
