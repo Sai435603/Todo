@@ -58,6 +58,17 @@ app.post("/edit/:id", (req, res) => {
         return res.json({ success: false });
     }
 });
+
+app.post("/:id",(req,res)=>{
+  let todos = readTodos();
+  let taskId = req.params.id;
+  let taskIndex = todos.findIndex(todo => todo.id === taskId);
+  if(taskIndex !== -1) {
+      return res.json({ success: true , task :todos[taskIndex].task });
+  } else {
+      return res.json({ success: false});
+  }
+});
 app.post("/add", (req, res) => {
     const { todo } = req.body;
     if (!todo) {

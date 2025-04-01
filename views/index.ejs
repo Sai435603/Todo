@@ -80,7 +80,7 @@
             <div class="task" id="<%= todo.id %>">
                 <span ><%= todo.task %></span>
                 <div>
-                    <input class="edit-btn" type="button" value="Edit" onclick="editTodo('<%=todo.id%>','<%=todo.task%>')">
+                    <input class="edit-btn" id='<%=todo.id%>' type="button" value="Edit" onclick="editTodo('<%=todo.id%>','<%=todo.task%>')">
                     <input class="delete-btn" type="button" value="Delete" onclick="deleteTodo('<%=todo.id%>')">
                 </div>
             </div>
@@ -89,27 +89,41 @@
     <script>
 
 
-        function editTodo(id,task){
-            let userInput = prompt("Edit your task:", task); 
-            if(userInput !== null && userInput.trim() !== "") { 
-            fetch(`/edit/${id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ task: userInput })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success){
-                    const div = document.getElementById(id);
-                    div.querySelector("span").innerHTML=userInput;
-                } 
-                else {
-                    alert("Failed to update task");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-      }
-    }
+function editTodo(id, task) {
+    fetch(`/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            task = data.task; // Update task with fetched data
+
+            // Now show the prompt after fetching task data
+            let userInput = prompt("Edit your task:", task);
+            if (userInput !== null && userInput.trim() !== "") {
+                fetch(`/edit/${id}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ task: userInput })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const div = document.getElementById(id);
+                        div.querySelector("span").innerHTML = userInput;
+                    } else {
+                        alert("Failed to update task");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        } else {
+            alert("Failed to fetch task");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
 
 
     function deleteTodo(id) {
@@ -125,7 +139,7 @@
             .catch(error => console.error("Error:", error));
         }
         //------- adding a Task
-
+        
         {
         document.addEventListener("DOMContentLoaded", function() {
         document.querySelector("form").addEventListener("submit", function(event) {
