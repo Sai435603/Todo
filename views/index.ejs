@@ -70,7 +70,7 @@
 </head>
 <body>
     <h1>To-Do List</h1>
-    <form action="/add" method="POST">
+    <form id="task-form">
         <input id="task-input" type="text" name="todo" placeholder="New task" required>
         <input id="task-input-btn" type="submit" value="Add">
     </form>
@@ -78,29 +78,23 @@
     <div class="task-list">
         <% for(const todo of todos) { %>
             <div class="task" id="<%= todo.id %>">
-                <span ><%= todo.task %></span>
+                <span><%= todo.task %></span>
                 <div>
-                    <input class="edit-btn" id='<%=todo.id%>' type="button" value="Edit" onclick="editTodo('<%=todo.id%>','<%=todo.task%>')">
+                    <input class="edit-btn" type="button" value="Edit" onclick="editTodo('<%=todo.id%>')">
                     <input class="delete-btn" type="button" value="Delete" onclick="deleteTodo('<%=todo.id%>')">
                 </div>
             </div>
         <% } %>
     </div>
-    <script>
 
-
-function editTodo(id, task) {
-    fetch(`/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-    })
+<script>
+    
+function editTodo(id) {
+    fetch(`/fetch/${id}`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            task = data.task; // Update task with fetched data
-
-            // Now show the prompt after fetching task data
-            let userInput = prompt("Edit your task:", task);
+            let userInput = prompt("Edit your task:", data.task);
             if (userInput !== null && userInput.trim() !== "") {
                 fetch(`/edit/${id}`, {
                     method: "POST",
@@ -110,8 +104,7 @@ function editTodo(id, task) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const div = document.getElementById(id);
-                        div.querySelector("span").innerHTML = userInput;
+                        document.getElementById(id).querySelector("span").textContent = userInput;
                     } else {
                         alert("Failed to update task");
                     }
@@ -125,26 +118,22 @@ function editTodo(id, task) {
     .catch(error => console.error("Error:", error));
 }
 
+function deleteTodo(id) {
+    fetch(`/delete/${id}`, { method: "DELETE" }) 
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "Task deleted successfully") {
+                document.getElementById(id).remove();
+            } else {
+                alert("Failed to delete task");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+}
 
-    function deleteTodo(id) {
-        fetch(`/delete/${id}`, { method: "DELETE" }) 
-            .then(response => {
-                if(response.ok) {
-                    document.getElementById(id).remove(); 
-                }
-                else{
-                    console.error("Failed to delete task");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-        //------- adding a Task
-        
-        {
-        document.addEventListener("DOMContentLoaded", function() {
-        document.querySelector("form").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent page reload
-
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("task-form").addEventListener("submit", function(event) {
+        event.preventDefault();
         const input = document.getElementById("task-input");
         const task = input.value.trim();
 
@@ -157,38 +146,16 @@ function editTodo(id, task) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    input.value = ""; // Clear input box after adding
-
-                    // Create new task element dynamically
-                    const taskList = document.querySelector(".task-list"); // Parent container
-                    const newTask = document.createElement("div");
-                    newTask.classList.add("task");
-                    newTask.id = data.todo.id; // Assuming backend sends the new task's ID
-                    newTask.innerHTML = `
-                        <span>${task}</span>
-                        <div>
-                            <input class="edit-btn" type="button" value="Edit">
-                            <input class="delete-btn" type="button" value="Delete">
-                        </div>
-                    `;
-
-                    taskList.appendChild(newTask); // Append to the list dynamically
-
-                    // Attach event listeners dynamically
-                    newTask.querySelector(".edit-btn").addEventListener("click", function() {
-                        editTodo(data.todo.id,task);
-                    });
-
-                    newTask.querySelector(".delete-btn").addEventListener("click", function() {
-                        deleteTodo(data.todo.id);
-                    });
+                    input.value = "";
+                    location.reload();
+                } else {
+                    alert("Failed to add task.");
                 }
             })
             .catch(error => console.error("Error:", error));
         }
     });
-   });
- } // adding task end
+});
     </script>
 </body>
 </html>
